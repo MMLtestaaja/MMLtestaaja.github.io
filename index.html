@@ -1,0 +1,82 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
+<title>Maavero testikansansalaispalvelu</title>
+<style type="text/css">
+.auto-style1 {
+	font-size: large;
+}
+.auto-style2 {
+	font-size: medium;
+}
+</style>
+</head>
+<body>
+  
+<div class="auto-style1">Maavero kansansalaispalvelu (testaus)</div>
+<div class="auto-style1"><span class="auto-style2">Pilottikuntien verohinta-alueet</span> </div>
+<iframe id='publishedMap'  src="https://hkptesti.maanmittauslaitos.fi/hkp/published/fi/924b10e9-5293-4a99-91c4-74d03b244858" allow="geolocation" style="border: none; width: 1240px; height: 700px;"></iframe>
+
+<script language="JavaScript" type="text/javascript" src="rpc-client.js"> </script>
+<script language="JavaScript" type="text/javascript" src="rpc-client.min.js"></script>
+
+<script>
+
+// init connection
+var IFRAME_DOMAIN = 'https://mmltestaaja.github.io';
+var iFrame = document.getElementById('publishedMap');
+var channel = OskariRPC.connect(
+    iFrame,
+    IFRAME_DOMAIN
+);
+
+
+
+channel.onReady(function() {
+    //channel is now ready and listening.
+    channel.log('Map is now listening');
+    window.alert("IFRAME_DOMAIN"); 
+    var expectedOskariVersion = '1.43.0';
+    channel.isSupported(expectedOskariVersion, function(blnSupported) {
+      if(blnSupported) {
+        channel.log('Client is supported and Oskari version is ' + expectedOskariVersion);
+      } else {
+        channel.log('Oskari-instance is not the one we expect (' + expectedOskariVersion + ') or client not supported');
+        // getInfo can be used to get the current Oskari version
+        channel.getInfo(function(oskariInfo) {
+          channel.log('Current Oskari-instance reports version as: ', oskariInfo);
+        });
+      }
+    });
+    channel.isSupported(function(blnSupported) {
+      if(!blnSupported) {
+        channel.log('Oskari reported client version (' + OskariRPC.VERSION + ') is not supported.' +
+        'The client might work, but some features are not compatible.');
+      } else {
+        channel.log('Client is supported by Oskari.');
+      }
+    });
+});
+
+
+//spinning action on the map
+channel.postRequest('ShowProgressSpinnerRequest',[true]);
+//listening to events and notifying user
+channel.handleEvent('MapClickedEvent', function(data) {
+  alert('Map clicked!');
+});
+//calling functions and doing things with the results
+channel.getAllLayers(function (layers) {
+  alert('Got '+layers.length+' layers!');
+});
+
+</script>
+
+</body>
+
+</html>
